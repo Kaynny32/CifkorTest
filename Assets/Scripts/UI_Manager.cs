@@ -10,8 +10,15 @@ public class UI_Manager : MonoBehaviour
     GameObject PapelWeather;
     [SerializeField]
     GameObject PapelDog;
+    [SerializeField]
+    GameObject InfoPopapBreed;
+    [SerializeField]
+    GameObject InfoPopapWeather;
 
-    public GameObject InfoPopap;
+    [SerializeField]
+    GameObject blockBtnWeather;
+    [SerializeField]
+    GameObject blockBtnBreed;
 
 
     private void Awake()
@@ -23,5 +30,28 @@ public class UI_Manager : MonoBehaviour
     private void Start()
     {
         PapelWeather.GetComponent<AnimUI>().ShowUI(false);
+    }
+
+    public GameObject GetInfoPopapBreed()
+    {
+        return InfoPopapBreed;
+    }
+    public GameObject GetInfoPopapWeather()
+    {
+        return InfoPopapWeather;
+    }
+
+    public GameObject GetBlockBtnWeather()
+    {
+        return blockBtnWeather;
+    }
+    public GameObject GetBlockBtnBreedr()
+    {
+        return blockBtnBreed;
+    }
+
+    public void UnBlockBtn(GameObject go)
+    { 
+        go.SetActive(false);
     }
 }

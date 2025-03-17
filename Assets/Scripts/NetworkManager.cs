@@ -4,6 +4,7 @@ using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using UnityEditor.ShaderGraph.Serialization;
+using System;
 
 
 public class NetworkManager : MonoBehaviour
@@ -15,13 +16,15 @@ public class NetworkManager : MonoBehaviour
     [SerializeField]
     List<BreedClass> _breeds;
     [SerializeField]
-    List<WeatherClass> _weather;
+    List<Period> _period;
+    [SerializeField]
+    WeatherClass _weatherClass;
 
 
     private void Start()
     {
         _breeds = new List<BreedClass>();
-        _weather = new List<WeatherClass>();
+        _period = new List<Period>();
     }
 
 
@@ -35,7 +38,7 @@ public class NetworkManager : MonoBehaviour
         StartCoroutine(SendMessageToBackand_Dogs());
     }
 
-    IEnumerator SendMessageToBackand_Weather()
+    IEnumerator SendMessageToBackand_Weather(/*Action<List<Period>> callback*/)
     {
         using (var request = UnityWebRequest.Get(urlWeather))
         {
@@ -57,24 +60,54 @@ public class NetworkManager : MonoBehaviour
             }
             else
             {
-               // Debug.Log(request.downloadHandler.text);
+                //Debug.Log(request.downloadHandler.text);
                 JObject jsonObject = JObject.Parse(request.downloadHandler.text);
 
-                JArray _jArray = jsonObject["data"].Value<JArray>();
+                JArray _jArray = jsonObject["properties"]["periods"].Value<JArray>();
 
-                _weather.Clear();
+                _period.Clear();
 
                 foreach (JObject _elem in _jArray)
-                {
+                {                    
 
-                    WeatherClass _weatherClass = new WeatherClass();
+                    int _number = _elem["number"].Value<int>();
+                    string _neme = _elem["name"].Value<string>();
+                    DateTime _startTime = _elem["startTime"].Value<DateTime>();
+                    DateTime _endTime = _elem["endTime"].Value<DateTime>();
+                    bool _isDaytime = _elem["isDaytime"].Value<bool>();
+                    int _temperature = _elem["temperature"].Value<int>();
+                    string _temperatureUnit = _elem["temperatureUnit"].Value<string>();
+                    string _temperatureTrend = _elem["temperatureTrend"].Value<string>();
 
-                    _weather.Add(_weatherClass);
+                    JObject _probabilityOfPrecipitation = _elem["probabilityOfPrecipitation"].Value<JObject>();
+
+                    string _unitCode = _probabilityOfPrecipitation["unitCode"].Value<string>();
+                    //int _value = _probabilityOfPrecipitation["value"].Value<int>();
+
+                    string _windSpeed = _elem["windSpeed"].Value<string>();
+                    string _windDirection = _elem["windDirection"].Value<string>();
+                    string _icon = _elem["icon"].Value<string>();
+                    string _shortForecast = _elem["shortForecast"].Value<string>();
+                    string _detailedForecast = _elem["detailedForecast"].Value<string>();
+
+                    ProbabilityOfPrecipitation probabilityOfPrecipitation = new ProbabilityOfPrecipitation(_unitCode/*, _value*/);                   
+                    Period period = new Period(_number, _neme, _startTime, _endTime, _isDaytime, _temperature, _temperatureUnit, _temperatureTrend, probabilityOfPrecipitation, _windSpeed, _windDirection, _icon, _shortForecast, _detailedForecast);    
+                    _period.Add(period);
                 }
+
+                string _units = jsonObject["properties"]["units"].Value<string>();
+                string _forecastGenerator = jsonObject["properties"]["forecastGenerator"].Value<string>();
+
+                DateTime _generatedAt = jsonObject["properties"]["generatedAt"].Value<DateTime>();
+                DateTime _updateTime = jsonObject["properties"]["updateTime"].Value<DateTime>();
+                string _validTimes = jsonObject["properties"]["validTimes"].Value<string>();
+
+                _weatherClass = new WeatherClass(_units, _forecastGenerator, _generatedAt, _updateTime, _validTimes);
+                WeatherUiManager.instance.InstatiateItem(_period);                
             }
         }
     }
-
+    
     IEnumerator SendMessageToBackand_Dogs()
     {
         using (var request = UnityWebRequest.Get(urlDog))
@@ -96,7 +129,7 @@ public class NetworkManager : MonoBehaviour
             }
             else
             {
-                // Debug.Log(request.downloadHandler.text);
+                 Debug.Log(request.downloadHandler.text);
                 JObject jsonObject = JObject.Parse(request.downloadHandler.text);
 
                 JArray _jArray = jsonObject["data"].Value<JArray>();
