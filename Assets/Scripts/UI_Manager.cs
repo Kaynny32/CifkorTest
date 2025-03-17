@@ -7,9 +7,9 @@ public class UI_Manager : MonoBehaviour
     public static UI_Manager instance;
 
     [SerializeField]
-    GameObject PapelWeather;
+    GameObject PopaplWeather;
     [SerializeField]
-    GameObject PapelDog;
+    GameObject PopaplDog;
     [SerializeField]
     GameObject InfoPopapBreed;
     [SerializeField]
@@ -29,7 +29,7 @@ public class UI_Manager : MonoBehaviour
 
     private void Start()
     {
-        PapelWeather.GetComponent<AnimUI>().ShowUI(false);
+        PopaplWeather.GetComponent<AnimUI>().ShowUI(false);
     }
 
     public GameObject GetInfoPopapBreed()

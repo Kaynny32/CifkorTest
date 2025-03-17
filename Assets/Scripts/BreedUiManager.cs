@@ -39,7 +39,7 @@ public class BreedUiManager : MonoBehaviour
 
             _cloneItem[i].GetComponent<Item>().Set_Hypoallergenic(id[i].attributes.hypoallergenic);
 
-            _cloneItem[i].GetComponent<Item>().AddClick(1,UI_Manager.instance.GetInfoPopapBreed(), true);
+            _cloneItem[i].GetComponent<Item>().AddClick(1,UI_Manager.instance.GetInfoPopapBreed());
             _cloneItem[i].gameObject.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = (i + 1).ToString();
             _cloneItem[i].gameObject.transform.GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>().text = id[i].attributes.name;           
         }        

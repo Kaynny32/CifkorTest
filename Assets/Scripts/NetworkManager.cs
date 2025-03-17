@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Serialization;
 using System;
 
 
@@ -38,7 +37,7 @@ public class NetworkManager : MonoBehaviour
         StartCoroutine(SendMessageToBackand_Dogs());
     }
 
-    IEnumerator SendMessageToBackand_Weather(/*Action<List<Period>> callback*/)
+    IEnumerator SendMessageToBackand_Weather()
     {
         using (var request = UnityWebRequest.Get(urlWeather))
         {
@@ -60,7 +59,7 @@ public class NetworkManager : MonoBehaviour
             }
             else
             {
-                //Debug.Log(request.downloadHandler.text);
+                Debug.Log(request.downloadHandler.text);
                 JObject jsonObject = JObject.Parse(request.downloadHandler.text);
 
                 JArray _jArray = jsonObject["properties"]["periods"].Value<JArray>();
@@ -103,7 +102,7 @@ public class NetworkManager : MonoBehaviour
                 string _validTimes = jsonObject["properties"]["validTimes"].Value<string>();
 
                 _weatherClass = new WeatherClass(_units, _forecastGenerator, _generatedAt, _updateTime, _validTimes);
-                WeatherUiManager.instance.InstatiateItem(_period);                
+                WeatherUiManager.instance.SortDataWeather(_period, _weatherClass);                
             }
         }
     }
@@ -129,7 +128,7 @@ public class NetworkManager : MonoBehaviour
             }
             else
             {
-                 Debug.Log(request.downloadHandler.text);
+                //Debug.Log(request.downloadHandler.text);
                 JObject jsonObject = JObject.Parse(request.downloadHandler.text);
 
                 JArray _jArray = jsonObject["data"].Value<JArray>();

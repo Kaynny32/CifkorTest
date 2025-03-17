@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class Item : MonoBehaviour
 {
+    #region Variables Breed
     [SerializeField]
     string _idBreed;
     [SerializeField]
@@ -20,8 +21,8 @@ public class Item : MonoBehaviour
     List<string> _female_weight = new List<string>();
     [SerializeField]
     bool _hypoallergenic;
-
-
+    #endregion
+    #region SetBreed
     public void SetId(string id)
     {
         _idBreed = id;
@@ -63,37 +64,47 @@ public class Item : MonoBehaviour
         _hypoallergenic = hypoallergenic;
     }
 
-    public void AddClick(int indexBtn, GameObject go, bool isActiveBreed)
+
+    #endregion
+    #region Variables Weather
+
+    #endregion
+    #region SetWeather
+
+    #endregion
+
+
+    public void AddClick(int indexBtn, GameObject go)
     {
-        transform.GetChild(indexBtn).GetComponent<Button>().onClick.AddListener(() => {
-            ClickBtn(go, isActiveBreed);
+        transform.GetChild(indexBtn).GetComponent<Button>().onClick.AddListener(() =>
+        {
+            ClickBtnBreed(go);
         });
     }
 
-    public void ClickBtn(GameObject go, bool isActiveBreed)
+    public void ClickBtnBreed(GameObject go)
     {
-        if (isActiveBreed)
-        {
-            UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = _name;
-            UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = _description;
+        UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = _name;
+        UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = _description;
 
-            UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(3).GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Min: {_life[0]}";
-            UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(3).GetChild(1).GetComponent<TextMeshProUGUI>().text = $"Max: {_life[1]}";
+        UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(3).GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Min: {_life[0]}";
+        UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(3).GetChild(1).GetComponent<TextMeshProUGUI>().text = $"Max: {_life[1]}";
 
-            UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Min: {_male_weight[0]}";
-            UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(4).GetChild(1).GetComponent<TextMeshProUGUI>().text = $"Max: {_male_weight[1]}";
+        UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Min: {_male_weight[0]}";
+        UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(4).GetChild(1).GetComponent<TextMeshProUGUI>().text = $"Max: {_male_weight[1]}";
 
-            UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(5).GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Min: {_female_weight[0]}";
-            UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(5).GetChild(1).GetComponent<TextMeshProUGUI>().text = $"Max: {_female_weight[1]}";
+        UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(5).GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Min: {_female_weight[0]}";
+        UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(5).GetChild(1).GetComponent<TextMeshProUGUI>().text = $"Max: {_female_weight[1]}";
 
-            UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(6).GetChild(0).GetComponent<Toggle>().isOn = _hypoallergenic;
+        UI_Manager.instance.GetInfoPopapBreed().transform.GetChild(6).GetChild(0).GetComponent<Toggle>().isOn = _hypoallergenic;
 
-            UI_Manager.instance.GetBlockBtnBreedr().SetActive(true);
-        }
-        else 
-        {
-            UI_Manager.instance.GetBlockBtnWeather().SetActive(true);
-        }
+        UI_Manager.instance.GetBlockBtnBreedr().SetActive(true);
         go.GetComponent<AnimUI>().ShowUI(false);
+    }
+
+    public void ClickBtnWeather()
+    {
+        UI_Manager.instance.GetInfoPopapWeather().GetComponent<AnimUI>().ShowUI(false);
+        UI_Manager.instance.GetBlockBtnWeather().SetActive(true);
     }
 }

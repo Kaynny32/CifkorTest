@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -9,44 +10,62 @@ public class WeatherUiManager : MonoBehaviour
     public static WeatherUiManager instance;
 
     [SerializeField]
-    GameObject _conteiner;
+    List<GameObject> DaysOfTheWeek = new List<GameObject>();
     [SerializeField]
-    GameObject _itemPrefab;
+    List<Period> periodsDay;
     [SerializeField]
-    List<GameObject> _cloneItem;
+    List<Period> periodsNight;
 
 
 
     private void Awake()
     {
-        if(instance == null) 
+        if (instance == null)
             instance = this;
     }
 
-    public void InstatiateItem(List<Period> p) 
+    private void Start()
     {
-        for (int i = 0; i < 7; i++)
-        {
-            _cloneItem.Add(Instantiate(_itemPrefab, _conteiner.transform));
-            if (p[i].isDaytime)
-            {
-                _cloneItem[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = p[i].name;
-                _cloneItem[i].transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = $"Temp: {p[i].temperature} {p[i].temperatureUnit}";
-                _cloneItem[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = $"Speed: {p[i].windSpeed} {p[i].windDirection}";
-            }
-            _cloneItem[i].GetComponent<Item>().AddClick(4,UI_Manager.instance.GetInfoPopapWeather(), false);
-        }
+        periodsDay = new List<Period>();
+        periodsNight = new List<Period>();
     }
 
-    public void DeleteItem()
+    public void SortDataWeather(List<Period> _periods, WeatherClass _weatherClass)
     {
-        if (_cloneItem.Count !=0)
+        periodsDay.Clear();
+        periodsNight.Clear();
+        for (int i = 0; i < _periods.Count; i++)
         {
-            for (int i = 0; i < 7; i++)
+            if (_periods[i].isDaytime)
+                periodsDay.Add(_periods[i]);
+            else
+                periodsNight.Add(_periods[i]);
+        }
+        AddDataUI(_weatherClass);
+    }
+
+    void AddDataUI(WeatherClass _weatherClass)
+    {
+        Debug.Log(_weatherClass.generatedAt.TimeOfDay.Hours);
+        if (_weatherClass.generatedAt.TimeOfDay.Hours < 18 )
+        {
+            Debug.Log("Day");
+            for (int i = 0; i < periodsDay.Count; i++)
             {
-                Destroy(_cloneItem[i]);
+                DaysOfTheWeek[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = periodsDay[i].name;
+                DaysOfTheWeek[i].transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = $"Temp: {periodsDay[i].temperature.ToString()} {periodsDay[i].temperatureUnit}";
+                DaysOfTheWeek[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = $"Speed: {periodsDay[i].windSpeed.ToString()} {periodsDay[i].windDirection}";
             }
-            _cloneItem.Clear();
+        }
+        else 
+        {
+            Debug.Log("Night");
+            for (int i = 0; i < periodsNight.Count; i++)
+            {
+                DaysOfTheWeek[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = periodsNight[i].name;
+                DaysOfTheWeek[i].transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = $"Temp: {periodsNight[i].temperature.ToString()} {periodsNight[i].temperatureUnit}";
+                DaysOfTheWeek[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = $"Speed: {periodsNight[i].windSpeed.ToString()} {periodsNight[i].windDirection}";
+            }
         }        
     }
 }
