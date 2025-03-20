@@ -4,10 +4,16 @@ using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System;
+using UnityEngine.Events;
 
 
 public class NetworkManager : MonoBehaviour
 {
+    public static NetworkManager instance;
+
+    [SerializeField]
+    QueueManager queueManager;
+
     [SerializeField]
     string urlWeather;
     [SerializeField]
@@ -20,21 +26,40 @@ public class NetworkManager : MonoBehaviour
     WeatherClass _weatherClass;
 
 
+    [HideInInspector]
+    public UnityEvent<bool> Weather_data = new UnityEvent<bool>();
+    [HideInInspector]
+    public UnityEvent<bool> Breed_data = new UnityEvent<bool>();
+
+
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+    }
+
     private void Start()
     {
         _breeds = new List<BreedClass>();
         _period = new List<Period>();
+        StartCorutineMessageToBackand_Weather(true);
     }
 
 
-    public void StartCorutineMessageToBackand_Weather()
+    void StartCorutineMessageToBackand_Weather(bool inQueueCall)
     {
-        StartCoroutine(SendMessageToBackand_Weather());
+        if (inQueueCall)
+            StartCoroutine(SendMessageToBackand_Weather());
+        else
+            queueManager.AddMassgeToQueue("Weather");
     }
 
-    public void StartCorutineMessageToBackand_Dog()
+    void StartCorutineMessageToBackand_Dog(bool inQueueCall)
     {
-        StartCoroutine(SendMessageToBackand_Dogs());
+        if(inQueueCall)
+            StartCoroutine(SendMessageToBackand_Dogs());
+        else
+            queueManager.AddMassgeToQueue("Breed");
     }
 
     IEnumerator SendMessageToBackand_Weather()
@@ -59,7 +84,7 @@ public class NetworkManager : MonoBehaviour
             }
             else
             {
-                Debug.Log(request.downloadHandler.text);
+                //Debug.Log(request.downloadHandler.text);
                 JObject jsonObject = JObject.Parse(request.downloadHandler.text);
 
                 JArray _jArray = jsonObject["properties"]["periods"].Value<JArray>();
@@ -102,7 +127,8 @@ public class NetworkManager : MonoBehaviour
                 string _validTimes = jsonObject["properties"]["validTimes"].Value<string>();
 
                 _weatherClass = new WeatherClass(_units, _forecastGenerator, _generatedAt, _updateTime, _validTimes);
-                WeatherUiManager.instance.SortDataWeather(_period, _weatherClass);                
+                WeatherUiManager.instance.SortDataWeather(_period, _weatherClass);
+                Weather_data.Invoke(false);
             }
         }
     }
@@ -178,7 +204,21 @@ public class NetworkManager : MonoBehaviour
                     _breeds.Add(_tempBreed);
                 }
                 BreedUiManager.instance.InstatiateItem(_breeds.Count, _breeds);
+                Breed_data.Invoke(false);
             }
+        }
+    }
+
+    public void SenMessageInQueue(string message)
+    {
+        switch (message)
+        {
+            case "Weather":
+                StartCorutineMessageToBackand_Weather(true);
+                break;
+            case "Breed":
+                StartCorutineMessageToBackand_Dog(true);
+                break;
         }
     }
 }

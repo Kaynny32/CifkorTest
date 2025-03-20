@@ -30,6 +30,17 @@ public class WeatherUiManager : MonoBehaviour
         periodsNight = new List<Period>();
     }
 
+    public string GetPeriodsDayLink(int i)
+    {
+        string url = periodsDay[i].icon;
+        return url;
+    }
+    public string GetPeriodsNightLink(int i)
+    {
+        string url = periodsNight[i].icon;
+        return url;
+    }
+
     public void SortDataWeather(List<Period> _periods, WeatherClass _weatherClass)
     {
         periodsDay.Clear();
@@ -46,10 +57,8 @@ public class WeatherUiManager : MonoBehaviour
 
     void AddDataUI(WeatherClass _weatherClass)
     {
-        Debug.Log(_weatherClass.generatedAt.TimeOfDay.Hours);
         if (_weatherClass.generatedAt.TimeOfDay.Hours < 18 )
         {
-            Debug.Log("Day");
             for (int i = 0; i < periodsDay.Count; i++)
             {
                 DaysOfTheWeek[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = periodsDay[i].name;
@@ -59,13 +68,32 @@ public class WeatherUiManager : MonoBehaviour
         }
         else 
         {
-            Debug.Log("Night");
             for (int i = 0; i < periodsNight.Count; i++)
             {
                 DaysOfTheWeek[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = periodsNight[i].name;
                 DaysOfTheWeek[i].transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = $"Temp: {periodsNight[i].temperature.ToString()} {periodsNight[i].temperatureUnit}";
                 DaysOfTheWeek[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = $"Speed: {periodsNight[i].windSpeed.ToString()} {periodsNight[i].windDirection}";
             }
-        }        
+        }
+        InfoPopap();
+    }
+
+    void InfoPopap()
+    {
+        for (int i = 0; i< DaysOfTheWeek.Count; i++)
+        {
+            DaysOfTheWeek[i].GetComponent<Item>().SetInfoDayAndNight(periodsDay[i].temperature, 
+                periodsDay[i].temperatureUnit, 
+                periodsDay[i].windSpeed,
+                periodsDay[i].windDirection,
+                periodsDay[i].shortForecast, 
+                periodsDay[i].detailedForecast, 
+                periodsNight[i].temperature, 
+                periodsNight[i].temperatureUnit, 
+                periodsNight[i].windSpeed, 
+                periodsNight[i].windDirection, 
+                periodsNight[i].shortForecast, 
+                periodsNight[i].detailedForecast);
+        }
     }
 }
