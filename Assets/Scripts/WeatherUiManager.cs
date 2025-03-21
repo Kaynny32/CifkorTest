@@ -4,17 +4,24 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class WeatherUiManager : MonoBehaviour
 {
     public static WeatherUiManager instance;
 
+    List<ItemWeather> _items = new List<ItemWeather>();
+
+    List<WeatherDayClass> _daysData = new List<WeatherDayClass>();
+
     [SerializeField]
-    List<GameObject> DaysOfTheWeek = new List<GameObject>();
+    GameObject _itemPrefab, _itemParent;
+
     [SerializeField]
-    List<Period> periodsDay;
+    List<Period> periods;
+
     [SerializeField]
-    List<Period> periodsNight;
+    AnimUI InfoPopapWeatherDay, InfoPopapWeatherNight, _closeBtn;
 
 
 
@@ -26,74 +33,133 @@ public class WeatherUiManager : MonoBehaviour
 
     private void Start()
     {
-        periodsDay = new List<Period>();
-        periodsNight = new List<Period>();
+        periods = new List<Period>();
     }
 
-    public string GetPeriodsDayLink(int i)
+    public string GetPeriodLink(int i)
     {
-        string url = periodsDay[i].icon;
+        string url = periods[i].icon;
         return url;
     }
-    public string GetPeriodsNightLink(int i)
-    {
-        string url = periodsNight[i].icon;
-        return url;
-    }
+ 
 
-    public void SortDataWeather(List<Period> _periods, WeatherClass _weatherClass)
+    public void AddDataWeather(List<Period> _periods, WeatherClass _weatherClass)
     {
-        periodsDay.Clear();
-        periodsNight.Clear();
-        for (int i = 0; i < _periods.Count; i++)
-        {
-            if (_periods[i].isDaytime)
-                periodsDay.Add(_periods[i]);
-            else
-                periodsNight.Add(_periods[i]);
-        }
+        periods.Clear();
+
+        periods = _periods;
+
         AddDataUI(_weatherClass);
     }
 
     void AddDataUI(WeatherClass _weatherClass)
     {
-        if (_weatherClass.generatedAt.TimeOfDay.Hours < 18 )
-        {
-            for (int i = 0; i < periodsDay.Count; i++)
+
+        int _dayCount = 0;
+        Period _tempDayTimePeriod = new Period();
+        bool isDayForecastExist = false;
+        ItemWeather _tempItem;
+
+
+        for (int i = 0; i < periods.Count; i++)
             {
-                DaysOfTheWeek[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = periodsDay[i].name;
-                DaysOfTheWeek[i].transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = $"Temp: {periodsDay[i].temperature.ToString()} {periodsDay[i].temperatureUnit}";
-                DaysOfTheWeek[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = $"Speed: {periodsDay[i].windSpeed.ToString()} {periodsDay[i].windDirection}";
-            }
-        }
-        else 
-        {
-            for (int i = 0; i < periodsNight.Count; i++)
+
+            if (periods[i].isDaytime)
             {
-                DaysOfTheWeek[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = periodsNight[i].name;
-                DaysOfTheWeek[i].transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = $"Temp: {periodsNight[i].temperature.ToString()} {periodsNight[i].temperatureUnit}";
-                DaysOfTheWeek[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = $"Speed: {periodsNight[i].windSpeed.ToString()} {periodsNight[i].windDirection}";
+                isDayForecastExist = true;
+                _tempDayTimePeriod = periods[i];
+            } else
+            {
+
+                WeatherDayClass _tempDayData = new WeatherDayClass();
+
+                _tempItem = Instantiate(_itemPrefab, _itemParent.transform).GetComponent<ItemWeather>();
+             
+                
+
+                if (isDayForecastExist)
+                {
+
+                    _tempDayData._dayName = _tempDayTimePeriod.name;
+                    _tempDayData._date = _tempDayTimePeriod.startTime;
+                    _tempDayData._temperatureUnit = _tempDayTimePeriod.temperatureUnit;
+                    _tempDayData._dayTemp = _tempDayTimePeriod.temperature;
+                    _tempDayData._dayWindSpd = _tempDayTimePeriod.windSpeed;
+                    _tempDayData._dayWindDirection = _tempDayTimePeriod.windDirection;
+                    _tempDayData._dayShort = _tempDayTimePeriod.shortForecast;
+                    _tempDayData._dayLong = _tempDayTimePeriod.detailedForecast;
+                    _tempDayData._isDayExist = true;
+                    _tempDayData._urlDay = _tempDayTimePeriod.icon;
+
+                    _tempItem.SetMainInfo(_dayCount, _tempDayTimePeriod.name, _tempDayTimePeriod.startTime, _tempDayTimePeriod.temperatureUnit);
+                    _tempItem.SetDayInfo(_tempDayTimePeriod.temperature, _tempDayTimePeriod.windSpeed, _tempDayTimePeriod.windDirection, _tempDayTimePeriod.shortForecast);
+               
+                }
+                else
+                {
+                    _tempDayData._dayName = periods[i].name;
+                    _tempDayData._date = periods[i].startTime;
+                    _tempDayData._temperatureUnit = periods[i].temperatureUnit;
+                    
+                    _tempItem.SetMainInfo(_dayCount, periods[i].name, periods[i].startTime, periods[i].temperatureUnit, false);
+                }
+
+                _tempDayData._nightTemp = periods[i].temperature;
+                _tempDayData._nightWindSpd = periods[i].windSpeed;
+                _tempDayData._nightWindDirection = periods[i].windDirection;
+                _tempDayData._nightShort = periods[i].shortForecast;
+                _tempDayData._nightLong = periods[i].detailedForecast;
+                _tempDayData._urlNight = periods[i].icon;
+
+                _tempItem.SetNightInfo(periods[i].temperature, periods[i].windSpeed, periods[i].windDirection, periods[i].shortForecast);
+
+                _dayCount++;
+                _daysData.Add(_tempDayData);
+                _items.Add(_tempItem);
+
             }
-        }
-        InfoPopap();
+            }
+      
+            
+        
+        
     }
 
-    void InfoPopap()
+    [SerializeField]
+    TextMeshProUGUI _puDayTemp, _puDayWindSpd, _puDayShort, _puDayLong, _puDate;
+
+    [SerializeField]
+    TextMeshProUGUI _puNightTemp, _puNightWindSpd, _puNightShort, _puNightLong;
+
+    [SerializeField]
+    RawImage _dayImage, _nightImage;
+
+
+    public void ShowPopUpById(int index)
     {
-        for (int i = 0; i< DaysOfTheWeek.Count; i++)
+        
+        _closeBtn.ShowUI();
+
+        WeatherDayClass itemWeather = _daysData[index];
+        
+
+        _puDate.text = itemWeather._dayName + ", " + itemWeather._date.ToString("d.MM");
+        if (itemWeather._isDayExist)
         {
-            DaysOfTheWeek[i].GetComponent<Item>().SetInfoDayAndNight(periodsDay[i].temperature, 
-                periodsDay[i].temperatureUnit, 
-                periodsDay[i].windSpeed,
-                periodsDay[i].windDirection,
-                periodsDay[i].shortForecast, 
-                periodsDay[i].detailedForecast, 
-                periodsNight[i].temperature, 
-                periodsNight[i].temperatureUnit, 
-                periodsNight[i].windSpeed, 
-                periodsNight[i].windDirection, 
-                periodsNight[i].shortForecast, 
-                periodsNight[i].detailedForecast);
+            FileDownloader.instance.StartLoadImage(itemWeather._urlDay, _dayImage);
+            InfoPopapWeatherDay.ShowUI();
+            _puDayTemp.text = itemWeather._dayTemp.ToString() + itemWeather._temperatureUnit;
+                _puDayWindSpd.text = itemWeather._dayWindSpd;
+            _puDayShort.text = itemWeather._dayShort;
+            _puDayLong.text = itemWeather._dayLong;
+            
         }
+        FileDownloader.instance.StartLoadImage(itemWeather._urlNight, _nightImage);
+        InfoPopapWeatherNight.ShowUI();
+        _puNightTemp.text = itemWeather._nightTemp.ToString() + itemWeather._temperatureUnit;
+        _puNightWindSpd.text = itemWeather._nightWindSpd;
+        _puNightShort.text = itemWeather._nightShort;
+        _puNightLong.text = itemWeather._nightLong;
     }
+
 }

@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class AnimUI : MonoBehaviour
 {
-    public void ShowUI(bool deleyActive)
+    public void ShowUI(bool delayActive = false)
     {
-       if (deleyActive)
+       if (delayActive)
             gameObject.GetComponent<CanvasGroup>().DOFade(1,0.75F).SetDelay(0.1f).SetEase(Ease.InOutExpo);
        else
             gameObject.GetComponent<CanvasGroup>().DOFade(1, 0.75F).SetEase(Ease.InOutExpo);

@@ -21,7 +21,7 @@ public class NetworkManager : MonoBehaviour
     [SerializeField]
     List<BreedClass> _breeds;
     [SerializeField]
-    List<Period> _period;
+    List<Period> _periods;
     [SerializeField]
     WeatherClass _weatherClass;
 
@@ -41,12 +41,12 @@ public class NetworkManager : MonoBehaviour
     private void Start()
     {
         _breeds = new List<BreedClass>();
-        _period = new List<Period>();
-        StartCorutineMessageToBackand_Weather(true);
+        _periods = new List<Period>();
+       // StartCorutineMessageToBackand_Weather(false);
     }
 
 
-    void StartCorutineMessageToBackand_Weather(bool inQueueCall)
+    public void StartCorutineMessageToBackand_Weather(bool inQueueCall)
     {
         if (inQueueCall)
             StartCoroutine(SendMessageToBackand_Weather());
@@ -54,7 +54,7 @@ public class NetworkManager : MonoBehaviour
             queueManager.AddMassgeToQueue("Weather");
     }
 
-    void StartCorutineMessageToBackand_Dog(bool inQueueCall)
+    public void StartCorutineMessageToBackand_Dog(bool inQueueCall)
     {
         if(inQueueCall)
             StartCoroutine(SendMessageToBackand_Dogs());
@@ -87,9 +87,11 @@ public class NetworkManager : MonoBehaviour
                 //Debug.Log(request.downloadHandler.text);
                 JObject jsonObject = JObject.Parse(request.downloadHandler.text);
 
+                Debug.Log(jsonObject);
+
                 JArray _jArray = jsonObject["properties"]["periods"].Value<JArray>();
 
-                _period.Clear();
+                _periods.Clear();
 
                 foreach (JObject _elem in _jArray)
                 {                    
@@ -113,10 +115,10 @@ public class NetworkManager : MonoBehaviour
                     string _icon = _elem["icon"].Value<string>();
                     string _shortForecast = _elem["shortForecast"].Value<string>();
                     string _detailedForecast = _elem["detailedForecast"].Value<string>();
-
-                    ProbabilityOfPrecipitation probabilityOfPrecipitation = new ProbabilityOfPrecipitation(_unitCode/*, _value*/);                   
-                    Period period = new Period(_number, _neme, _startTime, _endTime, _isDaytime, _temperature, _temperatureUnit, _temperatureTrend, probabilityOfPrecipitation, _windSpeed, _windDirection, _icon, _shortForecast, _detailedForecast);    
-                    _period.Add(period);
+                
+                    Period period = new Period(_number, _neme, _startTime, _endTime, _isDaytime, _temperature, _temperatureUnit,
+                        _temperatureTrend, _windSpeed, _windDirection, _icon, _shortForecast, _detailedForecast);    
+                    _periods.Add(period);
                 }
 
                 string _units = jsonObject["properties"]["units"].Value<string>();
@@ -127,7 +129,7 @@ public class NetworkManager : MonoBehaviour
                 string _validTimes = jsonObject["properties"]["validTimes"].Value<string>();
 
                 _weatherClass = new WeatherClass(_units, _forecastGenerator, _generatedAt, _updateTime, _validTimes);
-                WeatherUiManager.instance.SortDataWeather(_period, _weatherClass);
+                WeatherUiManager.instance.AddDataWeather(_periods, _weatherClass);
                 Weather_data.Invoke(false);
             }
         }

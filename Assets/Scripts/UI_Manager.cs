@@ -12,8 +12,7 @@ public class UI_Manager : MonoBehaviour
     GameObject PopaplDog;
     [SerializeField]
     GameObject InfoPopapBreed;
-    [SerializeField]
-    GameObject InfoPopapWeather;
+
 
     [SerializeField]
     GameObject blockBtnWeather;
@@ -36,9 +35,9 @@ public class UI_Manager : MonoBehaviour
     {
         return InfoPopapBreed;
     }
-    public GameObject GetInfoPopapWeather()
+    public void GetInfoPopapWeather()
     {
-        return InfoPopapWeather;
+      //  return InfoPopapWeather;
     }
 
     public GameObject GetBlockBtnWeather()

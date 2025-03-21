@@ -10,21 +10,15 @@ public class FileDownloader : MonoBehaviour
 {
     public static FileDownloader instance;
 
-    [SerializeField]
-    RawImage _rawImageDay;
-    [SerializeField]
-    RawImage _rawImageNight;
-
     private void Awake()
     {
         if (instance == null)
             instance = this;
     }
 
-    public void StartLoadImage(string urlDay, string urlNight)
+    public void StartLoadImage(string url, RawImage rawImage)
     { 
-        StartCoroutine(LoadImage(urlDay, _rawImageDay));
-        StartCoroutine(LoadImage(urlNight, _rawImageNight));
+        StartCoroutine(LoadImage(url, rawImage));
     }
 
     IEnumerator LoadImage(string url, RawImage image)

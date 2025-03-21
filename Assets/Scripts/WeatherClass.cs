@@ -23,7 +23,13 @@ public class WeatherClass
 [Serializable]
 public class Period
 {
-    public Period(int number, string name, DateTime startTime, DateTime endTime, bool isDaytime, int temperature, string temperatureUnit, string temperatureTrend, ProbabilityOfPrecipitation probabilityOfPrecipitation, string windSpeed, string windDirection, string icon, string shortForecast, string detailedForecast)
+
+    public Period()
+    {
+
+    }
+
+    public Period(int number, string name, DateTime startTime, DateTime endTime, bool isDaytime, int temperature, string temperatureUnit, string temperatureTrend, string windSpeed, string windDirection, string icon, string shortForecast, string detailedForecast)
     {
         this.number = number;
         this.name = name;
@@ -33,7 +39,6 @@ public class Period
         this.temperature = temperature;
         this.temperatureUnit = temperatureUnit;
         this.temperatureTrend = temperatureTrend;
-        this.probabilityOfPrecipitation = probabilityOfPrecipitation;
         this.windSpeed = windSpeed;
         this.windDirection = windDirection;
         this.icon = icon;
@@ -49,22 +54,9 @@ public class Period
     public int temperature { get; set; }
     public string temperatureUnit { get; set; }
     public string temperatureTrend { get; set; }
-    public ProbabilityOfPrecipitation probabilityOfPrecipitation { get; set; }
     public string windSpeed { get; set; }
     public string windDirection { get; set; }
     public string icon { get; set; }
     public string shortForecast { get; set; }
     public string detailedForecast { get; set; }
-}
-
-public class ProbabilityOfPrecipitation
-{
-    public ProbabilityOfPrecipitation(string unitCode) //int value)
-    {
-        this.unitCode = unitCode;
-       // this.value = value;
-    }
-
-    public string unitCode { get; set; }
-    //public int value { get; set; }
 }

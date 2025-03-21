@@ -52,8 +52,8 @@ public class QueueManager : MonoBehaviour
 
     IEnumerator SendMessageInQueue()
     { 
-        yield return new WaitForSeconds(1.5f);
-        Debug.Log("Start");
+        yield return new WaitForSeconds(0.1f);
+        Debug.Log("Start: " + messageConteiner.Name);
         NetworkManager.instance.SenMessageInQueue(messageConteiner.Name);
     }
 

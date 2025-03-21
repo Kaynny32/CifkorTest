@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Item : MonoBehaviour
+public class ItemBreed : MonoBehaviour
 {
     #region Variables Breed
     [SerializeField]
@@ -66,30 +66,6 @@ public class Item : MonoBehaviour
 
 
     #endregion
-    #region Variables Weather
-    [SerializeField]
-    int indexItem = 0;
-
-    int temperature, temperature_Night;
-    string temperatureUnit, windSpeed, windDirection, shortForecast, detailedForecast, temperatureUnit_Night, windSpeed_Night, windDirection_Night, shortForecast_Night, detailedForecast_Night;
-    #endregion
-    #region SetWeather
-    public void SetInfoDayAndNight(int i, string _temperatureUnit, string _windSpeed, string _windDirection, string _shortForecastt, string _detailedForecast, int i_Night, string _temperatureUnit_Night, string _windSpeed_Night, string _windDirection_Night, string _shortForecastt_Night, string _detailedForecast_Night)
-    {
-        temperature = i;
-        temperatureUnit = _temperatureUnit;
-        windSpeed = _windSpeed;
-        windDirection = _windDirection;
-        shortForecast = _shortForecastt;
-        detailedForecast = _detailedForecast;
-
-        temperature_Night = i_Night;
-        windSpeed_Night = _windSpeed_Night;
-        windDirection_Night = _windDirection_Night;
-        shortForecast_Night = _shortForecastt_Night;
-        detailedForecast_Night = _detailedForecast_Night;
-    }
-    #endregion
 
 
     public void AddClick(int indexBtn, GameObject go)
@@ -120,24 +96,4 @@ public class Item : MonoBehaviour
         go.GetComponent<AnimUI>().ShowUI(false);
     }
 
-    public void ClickBtnWeather()
-    {
-        FileDownloader.instance.StartLoadImage(WeatherUiManager.instance.GetPeriodsDayLink(indexItem), WeatherUiManager.instance.GetPeriodsNightLink(indexItem));
-        AddDataUI(UI_Manager.instance.GetInfoPopapWeather(),1,0,$"Temperature: {temperature} {temperatureUnit}");
-        AddDataUI(UI_Manager.instance.GetInfoPopapWeather(),1,1,$"Wind Speed: {windSpeed} {windDirection}");
-        AddDataUI(UI_Manager.instance.GetInfoPopapWeather(),1,2,$"Short Forecast: {shortForecast}");
-        AddDataUI(UI_Manager.instance.GetInfoPopapWeather(),1,3,$"Detailed Forecast: {detailedForecast}");
-
-        AddDataUI(UI_Manager.instance.GetInfoPopapWeather(), 3, 0, $"Temperature: {temperature_Night} {temperatureUnit_Night}");
-        AddDataUI(UI_Manager.instance.GetInfoPopapWeather(), 3, 1, $"Wind Speed: {windSpeed_Night} {windDirection_Night}");
-        AddDataUI(UI_Manager.instance.GetInfoPopapWeather(), 3, 2, $"Short Forecast: {shortForecast_Night}");
-        AddDataUI(UI_Manager.instance.GetInfoPopapWeather(), 3, 3, $"Detailed Forecast: {detailedForecast_Night}");
-        UI_Manager.instance.GetInfoPopapWeather().GetComponent<AnimUI>().ShowUI(false);
-        UI_Manager.instance.GetBlockBtnWeather().SetActive(true);
-    }
-
-    public void AddDataUI(GameObject go, int childCon, int childText,string str)
-    {
-        go.transform.GetChild(childCon).GetChild(childText).GetComponent<TextMeshProUGUI>().text = str;
-    }
 }
