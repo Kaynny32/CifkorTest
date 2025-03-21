@@ -4,7 +4,6 @@ using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System;
-using UnityEngine.Events;
 
 
 public class NetworkManager : MonoBehaviour
@@ -26,12 +25,6 @@ public class NetworkManager : MonoBehaviour
     WeatherClass _weatherClass;
 
 
-    [HideInInspector]
-    public UnityEvent<bool> Weather_data = new UnityEvent<bool>();
-    [HideInInspector]
-    public UnityEvent<bool> Breed_data = new UnityEvent<bool>();
-
-
     private void Awake()
     {
         if (instance == null)
@@ -46,23 +39,55 @@ public class NetworkManager : MonoBehaviour
     }
 
 
-    public void StartCorutineMessageToBackand_Weather(bool inQueueCall)
+    public void StartFetchingWeatherByInterval(float interval)
     {
-        if (inQueueCall)
-            StartCoroutine(SendMessageToBackand_Weather());
-        else
-            queueManager.AddMassgeToQueue("Weather");
+        StartCoroutine(FetchWeather(interval));
     }
 
-    public void StartCorutineMessageToBackand_Dog(bool inQueueCall)
+    public void SetActivePanel(int index)
     {
-        if(inQueueCall)
-            StartCoroutine(SendMessageToBackand_Dogs());
-        else
-            queueManager.AddMassgeToQueue("Breed");
+
+        queueManager.ClearQueue();
+        StopAllCoroutines();
+
+        switch (index)
+        {
+            case 0: {
+                    StartFetchingWeatherByInterval(5f);
+                } break;
+            case 1:
+                {
+                    StartCorutineMessageToBackend_Dog(true);
+                } break;
+        }
     }
 
-    IEnumerator SendMessageToBackand_Weather()
+    private IEnumerator FetchWeather(float interval)
+    {
+        Debug.Log("Fetching Weather..");
+        StartCorutineMessageToBackend_Weather(true);
+        yield return new WaitForSeconds(interval);
+        StartCoroutine(FetchWeather(interval));
+    }
+
+
+    private void StartCorutineMessageToBackend_Weather(bool inQueueCall)
+    {
+        if (!inQueueCall)
+            StartCoroutine(SendMessageToBackend_Weather());
+        else
+            queueManager.AddMessageToQueue("Weather");
+    }
+
+    private void StartCorutineMessageToBackend_Dog(bool inQueueCall)
+    {
+        if(!inQueueCall)
+            StartCoroutine(SendMessageToBackend_Dogs());
+        else
+            queueManager.AddMessageToQueue("Breed");
+    }
+
+    IEnumerator SendMessageToBackend_Weather()
     {
         using (var request = UnityWebRequest.Get(urlWeather))
         {
@@ -81,6 +106,8 @@ public class NetworkManager : MonoBehaviour
                     errorMessage = request.error;
                     Debug.Log(errorMessage);
                 }
+
+                queueManager.ControlMessageSending(false);
             }
             else
             {
@@ -128,14 +155,15 @@ public class NetworkManager : MonoBehaviour
                 DateTime _updateTime = jsonObject["properties"]["updateTime"].Value<DateTime>();
                 string _validTimes = jsonObject["properties"]["validTimes"].Value<string>();
 
-                _weatherClass = new WeatherClass(_units, _forecastGenerator, _generatedAt, _updateTime, _validTimes);
+             //   _weatherClass = new WeatherClass(_units, _forecastGenerator, _generatedAt, _updateTime, _validTimes);
+                _weatherClass = new WeatherClass(_units, _forecastGenerator, _generatedAt, DateTime.Now, _validTimes);
                 WeatherUiManager.instance.AddDataWeather(_periods, _weatherClass);
-                Weather_data.Invoke(false);
+                queueManager.ControlMessageSending(true);
             }
         }
     }
     
-    IEnumerator SendMessageToBackand_Dogs()
+    IEnumerator SendMessageToBackend_Dogs()
     {
         using (var request = UnityWebRequest.Get(urlDog))
         {
@@ -153,6 +181,8 @@ public class NetworkManager : MonoBehaviour
                 {
                     errorMessage = request.error;
                 }
+
+                queueManager.ControlMessageSending(false);
             }
             else
             {
@@ -205,21 +235,21 @@ public class NetworkManager : MonoBehaviour
 
                     _breeds.Add(_tempBreed);
                 }
-                BreedUiManager.instance.InstatiateItem(_breeds.Count, _breeds);
-                Breed_data.Invoke(false);
+                BreedUiManager.instance.AddDataUI(_breeds);
+                queueManager.ControlMessageSending(true);
             }
         }
     }
 
-    public void SenMessageInQueue(string message)
+    public void SendMessageInQueue(string message)
     {
         switch (message)
         {
             case "Weather":
-                StartCorutineMessageToBackand_Weather(true);
+                StartCorutineMessageToBackend_Weather(false);
                 break;
             case "Breed":
-                StartCorutineMessageToBackand_Dog(true);
+                StartCorutineMessageToBackend_Dog(false);
                 break;
         }
     }

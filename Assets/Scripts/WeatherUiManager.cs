@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,20 +42,30 @@ public class WeatherUiManager : MonoBehaviour
         string url = periods[i].icon;
         return url;
     }
- 
+
 
     public void AddDataWeather(List<Period> _periods, WeatherClass _weatherClass)
     {
+
         periods.Clear();
 
-        periods = _periods;
+        foreach (var srcPeriod in _periods)
+        {
+            periods.Add(srcPeriod);
+        }
+
 
         AddDataUI(_weatherClass);
     }
 
     void AddDataUI(WeatherClass _weatherClass)
     {
+        foreach (ItemWeather item in _items)
+            Destroy(item.gameObject);
 
+
+        _items.Clear();
+        _daysData.Clear();
         int _dayCount = 0;
         Period _tempDayTimePeriod = new Period();
         bool isDayForecastExist = false;
@@ -62,20 +73,20 @@ public class WeatherUiManager : MonoBehaviour
 
 
         for (int i = 0; i < periods.Count; i++)
-            {
+        {
 
             if (periods[i].isDaytime)
             {
                 isDayForecastExist = true;
                 _tempDayTimePeriod = periods[i];
-            } else
+            }
+            else
             {
 
                 WeatherDayClass _tempDayData = new WeatherDayClass();
-
                 _tempItem = Instantiate(_itemPrefab, _itemParent.transform).GetComponent<ItemWeather>();
-             
-                
+
+
 
                 if (isDayForecastExist)
                 {
@@ -93,14 +104,14 @@ public class WeatherUiManager : MonoBehaviour
 
                     _tempItem.SetMainInfo(_dayCount, _tempDayTimePeriod.name, _tempDayTimePeriod.startTime, _tempDayTimePeriod.temperatureUnit);
                     _tempItem.SetDayInfo(_tempDayTimePeriod.temperature, _tempDayTimePeriod.windSpeed, _tempDayTimePeriod.windDirection, _tempDayTimePeriod.shortForecast);
-               
+
                 }
                 else
                 {
                     _tempDayData._dayName = periods[i].name;
                     _tempDayData._date = periods[i].startTime;
                     _tempDayData._temperatureUnit = periods[i].temperatureUnit;
-                    
+
                     _tempItem.SetMainInfo(_dayCount, periods[i].name, periods[i].startTime, periods[i].temperatureUnit, false);
                 }
 
@@ -110,6 +121,7 @@ public class WeatherUiManager : MonoBehaviour
                 _tempDayData._nightShort = periods[i].shortForecast;
                 _tempDayData._nightLong = periods[i].detailedForecast;
                 _tempDayData._urlNight = periods[i].icon;
+                _tempDayData._updateTime = _weatherClass.updateTime;
 
                 _tempItem.SetNightInfo(periods[i].temperature, periods[i].windSpeed, periods[i].windDirection, periods[i].shortForecast);
 
@@ -118,15 +130,15 @@ public class WeatherUiManager : MonoBehaviour
                 _items.Add(_tempItem);
 
             }
-            }
-      
-            
-        
-        
+        }
+
+
+
+
     }
 
     [SerializeField]
-    TextMeshProUGUI _puDayTemp, _puDayWindSpd, _puDayShort, _puDayLong, _puDate;
+    TextMeshProUGUI _puDayTemp, _puDayWindSpd, _puDayShort, _puDayLong, _puDate, _puUpdateTime;
 
     [SerializeField]
     TextMeshProUGUI _puNightTemp, _puNightWindSpd, _puNightShort, _puNightLong;
@@ -137,11 +149,11 @@ public class WeatherUiManager : MonoBehaviour
 
     public void ShowPopUpById(int index)
     {
-        
+
         _closeBtn.ShowUI();
 
         WeatherDayClass itemWeather = _daysData[index];
-        
+
 
         _puDate.text = itemWeather._dayName + ", " + itemWeather._date.ToString("d.MM");
         if (itemWeather._isDayExist)
@@ -149,10 +161,14 @@ public class WeatherUiManager : MonoBehaviour
             FileDownloader.instance.StartLoadImage(itemWeather._urlDay, _dayImage);
             InfoPopapWeatherDay.ShowUI();
             _puDayTemp.text = itemWeather._dayTemp.ToString() + itemWeather._temperatureUnit;
-                _puDayWindSpd.text = itemWeather._dayWindSpd;
+            _puDayWindSpd.text = itemWeather._dayWindSpd;
             _puDayShort.text = itemWeather._dayShort;
             _puDayLong.text = itemWeather._dayLong;
-            
+
+        }
+        else
+        {
+            InfoPopapWeatherDay.HideUI();
         }
         FileDownloader.instance.StartLoadImage(itemWeather._urlNight, _nightImage);
         InfoPopapWeatherNight.ShowUI();
@@ -160,6 +176,8 @@ public class WeatherUiManager : MonoBehaviour
         _puNightWindSpd.text = itemWeather._nightWindSpd;
         _puNightShort.text = itemWeather._nightShort;
         _puNightLong.text = itemWeather._nightLong;
+
+        _puUpdateTime.text = "Last Upd: " + itemWeather._updateTime.ToString("HH:mm:ss");
     }
 
 }

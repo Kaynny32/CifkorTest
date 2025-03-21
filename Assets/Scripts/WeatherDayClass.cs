@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security;
 using UnityEngine;
 
 
@@ -20,4 +21,6 @@ public class WeatherDayClass
     public string _urlDay, _urlNight;
 
     public Sprite _dayImage, _nightImage;
+
+    public DateTime _updateTime;
 }

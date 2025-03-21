@@ -5,29 +5,40 @@ using UnityEngine.Rendering;
 
 
 [SerializeField]
-public class InfoConteiner
+public class InfoContainer 
 {
     public string Name;
 }
 public class QueueManager : MonoBehaviour
 {
-    InfoConteiner messageConteiner;
+    InfoContainer messageContainer;
 
-    Queue <InfoConteiner> NetworkMessageQueue = new Queue<InfoConteiner>();
+    Queue <InfoContainer> NetworkMessageQueue = new Queue<InfoContainer>();
 
-    bool QueueIsRuning = false;
+    [SerializeField]
+    bool QueueIsRunning = false;
 
-    public void AddMassgeToQueue(string name)
+    [SerializeField]
+    int _RequestsCount = 0;
+
+
+    private void FixedUpdate()
     {
-        InfoConteiner MessegeInfo = new InfoConteiner();
+        //DEBUG IN EDITOR
+        _RequestsCount = NetworkMessageQueue.Count;
+    }
+
+    public void AddMessageToQueue(string name)
+    {
+        InfoContainer MessegeInfo = new InfoContainer();
         MessegeInfo.Name = name;
         NetworkMessageQueue.Enqueue(MessegeInfo);
 
-        if (!QueueIsRuning)
+        if (!QueueIsRunning)
         {
-            messageConteiner = NetworkMessageQueue.Dequeue();
+            messageContainer = NetworkMessageQueue.Dequeue();
             StartCoroutine(SendMessageInQueue());
-            QueueIsRuning = true;
+            QueueIsRunning = true;
         }
     }
 
@@ -36,25 +47,31 @@ public class QueueManager : MonoBehaviour
         StopCoroutine(SendMessageInQueue());
         if (NetworkMessageQueue.Count > 0)
         {
-            messageConteiner = NetworkMessageQueue.Dequeue();
+            messageContainer = NetworkMessageQueue.Dequeue();
         }
-        messageConteiner = null;
-        QueueIsRuning = false;
+        messageContainer = null;
+        QueueIsRunning = false;
     }
 
     public bool CheckQueueIsEmpty()
     {
-        if (NetworkMessageQueue.Count == 0)
-            return true;
-        else 
-            return false;
+        return NetworkMessageQueue.Count < 1;
+    }
+
+
+    public void ClearQueue()
+    {
+        NetworkMessageQueue.Clear();
+        StopCoroutine(SendMessageInQueue());
+        QueueIsRunning = false;
+        messageContainer = null;
     }
 
     IEnumerator SendMessageInQueue()
     { 
         yield return new WaitForSeconds(0.1f);
-        Debug.Log("Start: " + messageConteiner.Name);
-        NetworkManager.instance.SenMessageInQueue(messageConteiner.Name);
+        Debug.Log("Start: " + messageContainer.Name);
+        NetworkManager.instance.SendMessageInQueue(messageContainer.Name);
     }
 
     public void ControlMessageSending(bool messageSendSuccessfully)
@@ -67,13 +84,13 @@ public class QueueManager : MonoBehaviour
         {
             if (!CheckQueueIsEmpty())
             {
-                messageConteiner = NetworkMessageQueue.Dequeue();
+                messageContainer = NetworkMessageQueue.Dequeue();
                 StartCoroutine(SendMessageInQueue());
             }
             else
             {
-                QueueIsRuning = false;
-                messageConteiner = null;
+                QueueIsRunning = false;
+                messageContainer = null;
             }
         }
     }

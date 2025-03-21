@@ -11,12 +11,20 @@ public class BreedUiManager : MonoBehaviour
     public static BreedUiManager instance;
 
     [SerializeField]
-    GameObject _conteiner;
+    TextMeshProUGUI _lifeMin, _lifeMax, _maleMin, _maleMax, _femaleMin, _femaleMax, _description, _name;
     [SerializeField]
-    GameObject _itemPrefab;
-    [SerializeField]
-    List<GameObject> _cloneItem;
+    Toggle _hypoallergenic;
 
+    [SerializeField]
+    GameObject _itemPrefab, _itemParent;
+
+    [SerializeField]
+    AnimUI _puInfo, _closeBtn;
+
+    List<ItemBreedClass> itemBreedClasses = new List<ItemBreedClass>();
+    [SerializeField]
+    List<ItemBreed> itemBreeds = new List<ItemBreed>();
+    
 
     private void Awake()
     {
@@ -24,33 +32,54 @@ public class BreedUiManager : MonoBehaviour
             instance = this;
     }
 
-    public void InstatiateItem(int count, List<BreedClass> id)
+
+    public void AddDataUI(List<BreedClass> breeds)
     {
-        /*      for (int i = 0; i< count; i++)
-            {
-              _cloneItem.Add(Instantiate(_itemPrefab, _conteiner.transform));
-                _cloneItem[i].GetComponent<Item>().SetId(id[i].id);
-                _cloneItem[i].GetComponent<Item>().SetName(id[i].attributes.name);
-                _cloneItem[i].GetComponent<Item>().SetDescription(id[i].attributes.description);
 
-                _cloneItem[i].GetComponent<Item>().Set_life(id[i].attributes.life.min.ToString(), id[i].attributes.life.max.ToString());
-                _cloneItem[i].GetComponent<Item>().Set_male_weight(id[i].attributes.male_weight.min.ToString(), id[i].attributes.male_weight.max.ToString());
-                _cloneItem[i].GetComponent<Item>().Set_female_weight(id[i].attributes.female_weight.min.ToString(), id[i].attributes.female_weight.max.ToString());
+        foreach (ItemBreed breed in itemBreeds) {
+            Destroy(breed.gameObject);
+        }
 
-                _cloneItem[i].GetComponent<Item>().Set_Hypoallergenic(id[i].attributes.hypoallergenic);
+        itemBreeds.Clear();
 
-                _cloneItem[i].GetComponent<Item>().AddClick(1,UI_Manager.instance.GetInfoPopapBreed());
-                _cloneItem[i].gameObject.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = (i + 1).ToString();
-                _cloneItem[i].gameObject.transform.GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>().text = id[i].attributes.name;           
-            }        */
+
+        ItemBreed itemBreed;
+        
+        for (int i = 0; i< breeds.Count; i++)
+        {
+            ItemBreedClass itemBreedClass = new ItemBreedClass();
+            itemBreed = Instantiate(_itemPrefab, _itemParent.transform).GetComponent<ItemBreed>();
+            itemBreed.SetInfo(i,i+1, breeds[i].attributes.name);
+
+            itemBreedClass._lifeMin = breeds[i].attributes.life.min.ToString();
+            itemBreedClass._lifeMax = breeds[i].attributes.life.max.ToString();
+            itemBreedClass._maleMin = breeds[i].attributes.male_weight.min.ToString();
+            itemBreedClass._maleMax = breeds[i].attributes.male_weight.max.ToString();
+            itemBreedClass._femaleMin = breeds[i].attributes.female_weight.min.ToString();
+            itemBreedClass._femaleMax = breeds[i].attributes.female_weight.max.ToString();
+            itemBreedClass._description = breeds[i].attributes.description.ToString();
+            itemBreedClass._name = breeds[i].attributes.name.ToString();
+            itemBreedClass._hypoallergenic = breeds[i].attributes.hypoallergenic;
+            this.itemBreedClasses.Add(itemBreedClass);
+            itemBreeds.Add(itemBreed);
+        }
     }
 
-    public void DeleteItem()
-    {
-        for (int i = 0; i< _cloneItem.Count; i++)        
-        {
-            Destroy(_cloneItem[i]);            
-        }
-        _cloneItem.Clear();
+
+
+    public void ShowPopUpById(int index)
+    {        
+        ItemBreedClass itemBreedClass = itemBreedClasses[index];
+        _lifeMin.text = itemBreedClass._lifeMin;
+        _lifeMax.text = itemBreedClass._lifeMax;
+        _maleMin.text = itemBreedClass._maleMin;
+        _maleMax.text = itemBreedClass._maleMax;
+        _femaleMin.text = itemBreedClass._femaleMin;
+        _femaleMax.text = itemBreedClass._femaleMax;
+        _description.text = itemBreedClass._description;
+        _name.text = itemBreedClass._name;
+        _hypoallergenic.isOn = itemBreedClass._hypoallergenic;
+        _closeBtn.ShowUI();
+        _puInfo.ShowUI();
     }
 }

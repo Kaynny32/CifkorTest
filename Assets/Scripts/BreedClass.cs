@@ -5,6 +5,9 @@ using System.Collections.Generic;
 [Serializable]
 public class BreedClass
 {
+    public BreedClass()
+    {
+    }
     public BreedClass(string id, string type, Attributes attributes, Relationships relationships)
     {
         this.id = id;
